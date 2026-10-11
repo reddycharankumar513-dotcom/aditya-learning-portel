@@ -66,4 +66,15 @@ export const adminService = {
   async updateInquiryStatus(id: string, status: string): Promise<{ inquiry: ContactInquiry }> {
     return api.patch<{ inquiry: ContactInquiry }>(`/api/admin/inquiries/${id}`, { status });
   },
+
+  // Platform Integrations & API Keys
+  async getSettings(): Promise<{ settings: any }> {
+    return api.get<{ settings: any }>('/api/admin/settings');
+  },
+  async updateSettings(data: { anthropicApiKey?: string; mongodbUri?: string }): Promise<{ message: string; settings: any }> {
+    return api.patch<{ message: string; settings: any }>('/api/admin/settings/keys', data);
+  },
+  async testAiIntegration(): Promise<{ success: boolean; message: string; latencyMs?: number; responseSample?: string }> {
+    return api.post<{ success: boolean; message: string; latencyMs?: number; responseSample?: string }>('/api/admin/settings/test-ai');
+  },
 };

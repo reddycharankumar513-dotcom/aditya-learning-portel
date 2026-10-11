@@ -27,6 +27,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminCourses } from './pages/AdminCourses';
 import { AdminInternships } from './pages/AdminInternships';
 import { AdminUsers } from './pages/AdminUsers';
+import { AdminSettings } from './pages/AdminSettings';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsConditions } from './pages/TermsConditions';
 import { NotFound } from './pages/NotFound';
@@ -170,6 +171,14 @@ export function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />

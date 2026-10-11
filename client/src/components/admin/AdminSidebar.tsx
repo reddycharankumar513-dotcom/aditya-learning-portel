@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, BookOpen, Briefcase, Users, 
-  MessageSquare, ArrowLeft, Shield 
+  MessageSquare, ArrowLeft, Shield, Key 
 } from 'lucide-react';
 
 export const AdminSidebar: React.FC = () => {
@@ -13,6 +13,7 @@ export const AdminSidebar: React.FC = () => {
     { label: 'Manage Courses', path: '/admin/courses', icon: BookOpen },
     { label: 'Manage Internships', path: '/admin/internships', icon: Briefcase },
     { label: 'User Directory', path: '/admin/users', icon: Users },
+    { label: 'API Keys & Settings', path: '/admin/settings', icon: Key },
   ];
 
   return (

@@ -15,6 +15,9 @@ import {
   updateAdminUserRole,
   getAdminInquiries,
   updateAdminInquiryStatus,
+  getSettings,
+  updateSettings,
+  testAiIntegration,
 } from '../controllers/adminController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { requireAdmin } from '../middleware/roleMiddleware.js';
@@ -49,5 +52,10 @@ router.patch('/users/:id/role', updateAdminUserRole);
 // Inquiries
 router.get('/inquiries', getAdminInquiries);
 router.patch('/inquiries/:id', updateAdminInquiryStatus);
+
+// API Keys & Platform Settings
+router.get('/settings', getSettings);
+router.patch('/settings/keys', updateSettings);
+router.post('/settings/test-ai', testAiIntegration);
 
 export default router;

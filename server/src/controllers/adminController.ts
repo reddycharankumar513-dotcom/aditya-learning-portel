@@ -5,6 +5,8 @@ import { Enrollment } from '../models/Enrollment.js';
 import { Internship } from '../models/Internship.js';
 import { Application } from '../models/Application.js';
 import { ContactInquiry } from '../models/ContactInquiry.js';
+import { ENV, updateEnvKey } from '../config/env.js';
+import { getDbStatus } from '../config/db.js';
 
 export const getMetrics = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -212,5 +214,114 @@ export const updateAdminInquiryStatus = async (req: Request, res: Response): Pro
     res.json({ message: 'Inquiry status updated.', inquiry });
   } catch (err: any) {
     res.status(500).json({ message: err.message || 'Failed to update inquiry status.' });
+  }
+};
+
+// Platform Integration & API Key Settings
+export const getSettings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rawKey = ENV.ANTHROPIC_API_KEY || '';
+    const anthropicConfigured = rawKey.trim().length > 10;
+    const anthropicMaskedKey = anthropicConfigured
+      ? `${rawKey.slice(0, 7)}...${rawKey.slice(-4)}`
+      : 'Not Configured (Running in Pedagogical Engine Mode)';
+
+    res.json({
+      settings: {
+        anthropicConfigured,
+        anthropicMaskedKey,
+        database: getDbStatus(),
+        jwtConfigured: !!ENV.JWT_SECRET,
+        clientUrl: ENV.CLIENT_URL,
+        port: ENV.PORT,
+        nodeEnv: ENV.NODE_ENV,
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || 'Failed to retrieve settings.' });
+  }
+};
+
+export const updateSettings = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { anthropicApiKey, mongodbUri } = req.body;
+
+    if (anthropicApiKey !== undefined) {
+      updateEnvKey('ANTHROPIC_API_KEY', anthropicApiKey.trim());
+    }
+
+    if (mongodbUri !== undefined && mongodbUri.trim()) {
+      updateEnvKey('MONGODB_URI', mongodbUri.trim());
+    }
+
+    const rawKey = ENV.ANTHROPIC_API_KEY || '';
+    const anthropicConfigured = rawKey.trim().length > 10;
+    const anthropicMaskedKey = anthropicConfigured
+      ? `${rawKey.slice(0, 7)}...${rawKey.slice(-4)}`
+      : 'Not Configured (Running in Pedagogical Engine Mode)';
+
+    res.json({
+      message: 'Integration settings updated successfully.',
+      settings: {
+        anthropicConfigured,
+        anthropicMaskedKey,
+        database: getDbStatus(),
+      },
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message || 'Failed to update integration settings.' });
+  }
+};
+
+export const testAiIntegration = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rawKey = ENV.ANTHROPIC_API_KEY || '';
+    if (!rawKey || rawKey.trim().length < 10) {
+      res.status(400).json({
+        success: false,
+        message: 'No Anthropic API Key is currently configured. Please enter a valid API key first.',
+      });
+      return;
+    }
+
+    const startTime = Date.now();
+    const testResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': rawKey.trim(),
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 30,
+        messages: [{ role: 'user', content: 'Ping' }],
+      }),
+    });
+
+    const latencyMs = Date.now() - startTime;
+
+    if (testResponse.ok) {
+      const data: any = await testResponse.json();
+      res.json({
+        success: true,
+        message: 'Claude API connection verified successfully!',
+        model: 'claude-3-5-sonnet-20241022',
+        latencyMs,
+        responseSample: data?.content?.[0]?.text || 'OK',
+      });
+    } else {
+      const errData: any = await testResponse.json().catch(() => ({}));
+      res.status(testResponse.status).json({
+        success: false,
+        message: `Claude API returned status ${testResponse.status}: ${errData?.error?.message || 'Authentication or request error.'}`,
+        error: errData,
+      });
+    }
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: `Failed to connect to Anthropic servers: ${err.message}`,
+    });
   }
 };
