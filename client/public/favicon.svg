@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="aditya-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" />
+      <stop offset="0.5" stop-color="#7C3AED" />
+      <stop offset="1" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="url(#aditya-grad)" />
+  <path d="M24 10L36 34H30L27.5 29H20.5L18 34H12L24 10ZM24 18L21.8 24.5H26.2L24 18Z" fill="white" />
+  <circle cx="24" cy="14" r="2.5" fill="#67E8F9" />
+</svg>
