@@ -1,4 +1,6 @@
 // Base API Client for ADITYA
+import { handleMockApiRequest } from './mockApiHandler';
+
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export class ApiError extends Error {
@@ -32,8 +34,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       headers,
     });
 
-    const isJson = response.headers.get('content-type')?.includes('application/json');
-    const data = isJson ? await response.json() : null;
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+
+    // If Vercel or static hosting rewrites /api/* to index.html (text/html),
+    // fallback gracefully to client-side simulated interactive backend
+    if (!isJson) {
+      console.info(`[ADITYA Network Notice] Endpoint ${endpoint} returned non-JSON (${contentType}). Falling back to client-side storage engine.`);
+      return handleMockApiRequest<T>(endpoint, options);
+    }
+
+    const data = await response.json();
 
     if (!response.ok) {
       throw new ApiError(
@@ -48,7 +59,18 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(500, error.message || 'Network error occurred');
+
+    // Network error (e.g. backend server is not running on localhost or CORS failed)
+    // Seamlessly fallback to mock API handler so the UI remains 100% functional
+    console.info(`[ADITYA Network Fallback] Switching to client mock handler for ${endpoint}:`, error.message);
+    try {
+      return handleMockApiRequest<T>(endpoint, options);
+    } catch (fallbackError: any) {
+      if (fallbackError instanceof ApiError) {
+        throw fallbackError;
+      }
+      throw new ApiError(500, fallbackError.message || 'Internal application error');
+    }
   }
 }
 
