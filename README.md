@@ -1,19 +1,55 @@
-# ADITYA — AI-Powered Education, Technology Training & Career Development Platform
+# LEARNOVA — AI Career Intelligence Platform
 
-> **"Learn. Build. Innovate. Succeed."**
+> **"Learn. Build. Prove. Get Hired."**
 
-A complete, modern, responsive full-stack educational web application designed with a premium technology startup aesthetic. ADITYA provides specialized training curriculums in Artificial Intelligence, Machine Learning, Data Science, Software Development, Cloud Computing, and Career Preparation, integrated with a 24/7 Claude-powered interactive AI Learning Tutor.
+LEARNOVA is an AI Career Intelligence Platform with a 3D UI/UX that connects learning, hands-on engineering, automated evaluation, and career recruitment. Designed for college students, fresh graduates, internship applicants, entry-level job seekers, and forward-thinking employers.
 
 ---
 
-## 🚀 Key Highlights & Architectural Overview
+## 🌟 Key Highlights & Architectural Overview
 
-- **Design Aesthetic:** Premium tech startup visual identity featuring clean slate backgrounds, dark navy typography, electric blue primary accents (`#2563EB`), vibrant violet highlights (`#7C3AED`), cyan accents (`#06B6D4`), subtle gradients, rounded cards, and smooth micro-interactions.
-- **Frontend:** Built with React 19, TypeScript, Vite, Tailwind CSS, Lucide React icons, and React Router v7. Includes full responsive mobile navigation drawer, interactive course catalogs, module syllabus progress trackers, portfolio managers, and an interactive Claude AI workspace.
-- **Backend:** Node.js, Express.js REST API with modular controllers, services, Mongoose models, and strict role-based access control.
-- **Database:** MongoDB Atlas / local MongoDB with schemas for Users, Courses, Modules, Enrollments, AI Conversations, Internships, Applications, Portfolio Projects, and Contact Inquiries.
-- **Authentication & Security:** Secure registration, bcrypt password hashing, signed JSON Web Tokens (JWT), role-based middleware (`student`, `instructor`, `admin`), password reset tokens, Helmet security headers, CORS origin protection, and rate limiting.
-- **24/7 AI Tutor:** Powered by the Claude API (`claude-3-5-sonnet-20241022`) via backend proxy endpoints. Features adaptive depth levels (Beginner, Intermediate, Advanced), syntax highlighting with one-click code copy, session history persistence, and a built-in pedagogical rule engine fallback.
+- **Visual Direction & 3D UI/UX:**
+  - Deep midnight navy (`#080B18`, `#10162A`, `#151D35`) aesthetic with electric violet (`#8065FF`) and cyan (`#32C8F5`) accents.
+  - Interactive **3D Floating AI Intelligence Sphere** on hero using Three.js and React Three Fiber with orbiting nodes, particle cloud, and pointer parallax.
+  - Compact 3D Career Growth Stage Orb on the Student Dashboard.
+  - Resilient WebGL fallbacks for low-end/mobile devices with Canvas Error Boundaries.
+  - Polished glassmorphism (`glass-panel`) with high-contrast readable typography (Space Grotesk, Manrope, Inter).
+- **Career Readiness Score Algorithm:**
+  - Multi-factor evaluation: Skills (30%), Interviews (30%), Resume ATS (20%), and Projects (20%).
+- **AI Mock Interview Simulator:**
+  - 13+ engineering role question banks across Technical, Behavioral, System Design, and Problem Solving categories.
+  - 6-rubric weighted evaluation: Technical Knowledge (30%), Answer Relevance (20%), Problem Solving (20%), Communication Clarity (15%), Answer Structure (10%), and Time Management (5%).
+  - Detailed post-interview diagnostic reports highlighting strengths, weaknesses, and missing key technical concepts.
+- **ATS Resume Analyzer & Google XYZ Rewriter:**
+  - Real-time ATS match scoring against target Job Descriptions.
+  - Keyword gap extraction and automated XYZ formula bullet point suggestions (*"Accomplished [X], as measured by [Y], by doing [Z]"*).
+- **Personalized Learning Roadmap & Multilingual Coding Sandbox:**
+  - Step-by-step role roadmaps with weekly milestones and resource links.
+  - In-browser coding sandbox supporting JavaScript, Python, Java, C++, and SQL with unit testing and output consoles.
+  - Project Mentor with architecture and database schema guidance.
+- **Career Hub & Privacy-Consented Talent Discovery:**
+  - Curated opportunities with dynamic candidate skill match scores.
+  - 1-click application submission with pipeline status tracking (`Applied`, `Under Review`, `Shortlisted`, `Interview Scheduled`, `Hired`).
+  - Student verified portfolio with explicit recruiter sharing consent toggle (`consentShareProfile`).
+- **Employer Portal (Learnova Talent):**
+  - Dedicated recruiter console for posting opportunities, managing applicants across pipeline stages, and searching consented talent with skill filters and readiness thresholds.
+- **Payment & Entitlement Foundation:**
+  - Tiered plan architecture (`FREE`, `STARTER`, `PRO`, `PREMIUM`).
+  - Razorpay order creation and HMAC-SHA256 cryptographic signature verification.
+  - Credit consumption ledger and entitlement checks.
+- **Automated Test Suite:**
+  - 7 comprehensive automated test suites covering question generation, rubric algorithms, ATS analysis, entitlement matrix, cryptographic HMAC signature verification, candidate privacy consent, and pipeline state transitions.
+
+---
+
+## 🚀 Technology Stack
+
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS, Three.js, React Three Fiber, Drei, Lucide React, React Router v7.
+- **Backend:** Node.js, Express.js, TypeScript, Mongoose.
+- **Database:** MongoDB Atlas / Local MongoDB.
+- **Payment Gateway:** Razorpay (with HMAC-SHA256 signature verification).
+- **AI Orchestration:** Google Gemini / Anthropic Claude with deterministic rule-engine fallbacks.
+- **Security:** Helmet headers, CORS origin protection, JWT authentication, rate limiting, and RBAC guards.
 
 ---
 
