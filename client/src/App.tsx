@@ -33,6 +33,10 @@ import { InterviewNew } from './pages/InterviewNew';
 import { InterviewSession } from './pages/InterviewSession';
 import { InterviewReport } from './pages/InterviewReport';
 import { ResumeAnalyzer } from './pages/ResumeAnalyzer';
+import { PersonalizedRoadmap } from './pages/PersonalizedRoadmap';
+import { CodingSandbox } from './pages/CodingSandbox';
+import { ProjectMentor } from './pages/ProjectMentor';
+import { CareerAnalytics } from './pages/CareerAnalytics';
 
 // Preserved Existing Student Course Pages
 import { MyCourses } from './pages/MyCourses';
@@ -176,6 +180,38 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <ResumeAnalyzer />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/career"
+              element={
+                <ProtectedRoute>
+                  <CareerAnalytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/learning/roadmap"
+              element={
+                <ProtectedRoute>
+                  <PersonalizedRoadmap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/coding"
+              element={
+                <ProtectedRoute>
+                  <CodingSandbox />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/projects"
+              element={
+                <ProtectedRoute>
+                  <ProjectMentor />
                 </ProtectedRoute>
               }
             />
