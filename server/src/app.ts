@@ -23,6 +23,7 @@ import resumeRoutes from './routes/resumeRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import learningPlusRoutes from './routes/learningPlusRoutes.js';
 import careerHubRoutes from './routes/careerHubRoutes.js';
+import employerRoutes from './routes/employerRoutes.js';
 
 export const createApp = (): Express => {
   const app = express();
@@ -84,6 +85,7 @@ export const createApp = (): Express => {
   app.use('/api/payments', paymentRoutes);
   app.use('/api/learning-plus', learningPlusRoutes);
   app.use('/api/career-hub', careerHubRoutes);
+  app.use('/api/employers', employerRoutes);
 
   // Centralized Error Handler
   app.use(errorHandler);

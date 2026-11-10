@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { LearnovaLogo } from './LearnovaLogo';
 import { 
   Menu, X, Sparkles, Trophy, FileText, Briefcase, 
-  User as UserIcon, LogOut, LayoutDashboard, Shield, ChevronDown, CheckCircle2
+  User as UserIcon, LogOut, LayoutDashboard, Shield, ChevronDown, CheckCircle2, Building2
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -160,6 +160,17 @@ export const Navbar: React.FC = () => {
                         <UserIcon className="w-4 h-4 text-[#A6B0C8]" />
                         Career Profile Settings
                       </Link>
+
+                      {(user.role === 'employer' || isAdmin) && (
+                        <Link
+                          to="/employer/dashboard"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2 text-xs text-[#32C8F5] hover:bg-white/10 hover:text-white transition-colors border-t border-white/5 mt-1"
+                        >
+                          <Building2 className="w-4 h-4 text-[#32C8F5]" />
+                          Employer Talent Suite
+                        </Link>
+                      )}
 
                       {isAdmin && (
                         <Link

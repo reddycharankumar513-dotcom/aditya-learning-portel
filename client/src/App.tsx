@@ -41,6 +41,12 @@ import { CareerHub } from './pages/CareerHub';
 import { ApplicationTracker } from './pages/ApplicationTracker';
 import { StudentPortfolio } from './pages/StudentPortfolio';
 
+// LEARNOVA Employer Suite
+import { EmployerDashboard } from './pages/EmployerDashboard';
+import { EmployerJobs } from './pages/EmployerJobs';
+import { TalentDiscovery } from './pages/TalentDiscovery';
+import { EmployerPipeline } from './pages/EmployerPipeline';
+
 // Preserved Existing Student Course Pages
 import { MyCourses } from './pages/MyCourses';
 import { LearningPath } from './pages/LearningPath';
@@ -250,8 +256,114 @@ export function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/student/learning"
+              element={
+                <ProtectedRoute>
+                  <PersonalizedRoadmap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/billing"
+              element={
+                <ProtectedRoute>
+                  <Pricing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/settings"
+              element={
+                <ProtectedRoute>
+                  <StudentProfile />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* 4. Preserved Course & Learning Routes */}
+            {/* 4. LEARNOVA Employer Portal */}
+            <Route
+              path="/employer/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/company"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/jobs"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerJobs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/internships"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerJobs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/candidates"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <TalentDiscovery />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/talent"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <TalentDiscovery />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/pipeline"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerPipeline />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/assessments"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/billing"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <Pricing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employer/settings"
+              element={
+                <ProtectedRoute allowedRoles={['employer']}>
+                  <EmployerDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 5. Preserved Course & Learning Routes */}
             <Route
               path="/dashboard/my-courses"
               element={
@@ -285,9 +397,17 @@ export function App() {
               }
             />
 
-            {/* 5. Protected Administrator Portal Pages */}
+            {/* 6. Protected Administrator Portal Pages */}
             <Route
               path="/admin"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminDashboard />
@@ -323,6 +443,62 @@ export function App() {
               element={
                 <ProtectedRoute requireAdmin>
                   <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/plans"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/payments"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/subscriptions"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/refunds"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/employers"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/jobs"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminInternships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />
