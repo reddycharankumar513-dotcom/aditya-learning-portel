@@ -37,6 +37,9 @@ import { PersonalizedRoadmap } from './pages/PersonalizedRoadmap';
 import { CodingSandbox } from './pages/CodingSandbox';
 import { ProjectMentor } from './pages/ProjectMentor';
 import { CareerAnalytics } from './pages/CareerAnalytics';
+import { CareerHub } from './pages/CareerHub';
+import { ApplicationTracker } from './pages/ApplicationTracker';
+import { StudentPortfolio } from './pages/StudentPortfolio';
 
 // Preserved Existing Student Course Pages
 import { MyCourses } from './pages/MyCourses';
@@ -219,7 +222,31 @@ export function App() {
               path="/student/career-hub"
               element={
                 <ProtectedRoute>
-                  <Internships />
+                  <CareerHub />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/opportunities"
+              element={
+                <ProtectedRoute>
+                  <CareerHub />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/applications"
+              element={
+                <ProtectedRoute>
+                  <ApplicationTracker />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/portfolio"
+              element={
+                <ProtectedRoute>
+                  <StudentPortfolio />
                 </ProtectedRoute>
               }
             />
