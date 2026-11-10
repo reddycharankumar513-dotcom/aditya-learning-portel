@@ -1,8 +1,44 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { Check, Sparkles, Shield, Zap, ArrowRight, HelpCircle } from 'lucide-react';
+import { RazorpayCheckoutModal } from '../components/payment/RazorpayCheckoutModal';
 
 export const Pricing: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const [selectedProduct, setSelectedProduct] = useState<{
+    id: string;
+    name: string;
+    price: number;
+    type: 'plan_subscription' | 'credit_pack';
+    credits?: number;
+  } | null>(null);
+
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+
+  const handleSelectPlan = (id: string, name: string, price: number, credits: number) => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (price === 0) {
+      navigate('/student/dashboard');
+      return;
+    }
+
+    setSelectedProduct({
+      id,
+      name,
+      price,
+      type: 'plan_subscription',
+      credits,
+    });
+    setCheckoutModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#080B18] text-[#F5F7FF] py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
@@ -47,12 +83,12 @@ export const Pricing: React.FC = () => {
                 </li>
               </ul>
             </div>
-            <Link
-              to="/register"
+            <button
+              onClick={() => handleSelectPlan('plan_free', 'Free Student', 0, 5)}
               className="mt-8 w-full py-3.5 rounded-xl border border-white/10 hover:bg-white/5 text-center text-xs font-semibold text-white block transition-colors"
             >
-              Get Started Free
-            </Link>
+              {user?.plan === 'FREE' ? 'Current Tier' : 'Get Started Free'}
+            </button>
           </div>
 
           {/* STARTER */}
@@ -80,12 +116,12 @@ export const Pricing: React.FC = () => {
                 </li>
               </ul>
             </div>
-            <Link
-              to="/register"
+            <button
+              onClick={() => handleSelectPlan('plan_starter_monthly', 'Starter', 199, 25)}
               className="mt-8 w-full py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-center text-xs font-semibold text-white block transition-colors"
             >
-              Start 7-Day Trial
-            </Link>
+              {user?.plan === 'STARTER' ? 'Current Plan' : 'Upgrade to Starter'}
+            </button>
           </div>
 
           {/* PRO (Recommended) */}
@@ -115,16 +151,16 @@ export const Pricing: React.FC = () => {
                   <Check className="w-4 h-4 text-[#30D6A0]" /> Personalized AI Roadmaps
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-[#30D6A0]" /> Coding Sandbox Multi-language
+                  <Check className="w-4 h-4 text-[#30D6A0]" /> Multi-language Coding Practice
                 </li>
               </ul>
             </div>
-            <Link
-              to="/register"
+            <button
+              onClick={() => handleSelectPlan('plan_pro_monthly', 'Pro Career', 399, 999)}
               className="mt-8 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#8065FF] to-[#32C8F5] text-center text-xs font-bold text-white block transition-all shadow-glow-violet"
             >
-              Upgrade to Pro
-            </Link>
+              {user?.plan === 'PRO' ? 'Current Plan' : 'Upgrade to Pro'}
+            </button>
           </div>
 
           {/* PREMIUM */}
@@ -152,12 +188,12 @@ export const Pricing: React.FC = () => {
                 </li>
               </ul>
             </div>
-            <Link
-              to="/register"
+            <button
+              onClick={() => handleSelectPlan('plan_premium_monthly', 'Premium Career', 699, 999)}
               className="mt-8 w-full py-3.5 rounded-xl border border-white/10 hover:bg-white/5 text-center text-xs font-semibold text-white block transition-colors"
             >
-              Choose Premium
-            </Link>
+              {user?.plan === 'PREMIUM' ? 'Current Plan' : 'Choose Premium'}
+            </button>
           </div>
 
         </div>
@@ -175,6 +211,16 @@ export const Pricing: React.FC = () => {
         </div>
 
       </div>
+
+      {/* Razorpay Checkout Modal */}
+      <RazorpayCheckoutModal
+        isOpen={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        product={selectedProduct}
+        onSuccess={() => {
+          // Success callback
+        }}
+      />
     </div>
   );
 };

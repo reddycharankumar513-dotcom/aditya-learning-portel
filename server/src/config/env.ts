@@ -12,6 +12,9 @@ export const ENV = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || 'rzp_test_LearnovaDemo2026',
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || 'learnova_rzp_secret_key_mock_987654',
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || 'learnova_webhook_secret_key_123456',
 };
 
 export const updateEnvKey = (key: keyof typeof ENV, value: any): void => {

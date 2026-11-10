@@ -905,5 +905,85 @@ export function handleMockApiRequest<T>(endpoint: string, options: RequestInit =
     } as unknown as T;
   }
 
+  // -------------------------------------------------------------
+  // RAZORPAY PAYMENT SIMULATION HANDLERS
+  // -------------------------------------------------------------
+  if (path === '/api/payments/plans' && method === 'GET') {
+    return {
+      success: true,
+      currency: 'INR',
+      plans: [
+        { id: 'plan_starter_monthly', name: 'Starter', tier: 'STARTER', price: 199, interval: 'monthly', credits: 25 },
+        { id: 'plan_pro_monthly', name: 'Pro Career', tier: 'PRO', price: 399, interval: 'monthly', credits: 999 },
+        { id: 'plan_premium_monthly', name: 'Premium Career', tier: 'PREMIUM', price: 699, interval: 'monthly', credits: 999 },
+      ],
+      creditPacks: [
+        { id: 'pack_10_credits', name: '10 Interview Credits Pack', price: 149, credits: 10 },
+        { id: 'pack_25_credits', name: '25 Interview Credits Pack', price: 299, credits: 25 },
+      ],
+      keyId: 'rzp_test_LearnovaDemo2026',
+    } as unknown as T;
+  }
+
+  if (path === '/api/payments/create-order' && method === 'POST') {
+    const orderId = `order_test_${Date.now()}`;
+    return {
+      success: true,
+      order: {
+        id: orderId,
+        amount: (body.itemId?.includes('starter') ? 199 : body.itemId?.includes('premium') ? 699 : 399) * 100,
+        currency: 'INR',
+        keyId: 'rzp_test_LearnovaDemo2026',
+        itemTitle: body.itemId,
+        priceRupees: body.itemId?.includes('starter') ? 199 : body.itemId?.includes('premium') ? 699 : 399,
+      },
+      paymentId: `pay_${Date.now()}`,
+    } as unknown as T;
+  }
+
+  if (path === '/api/payments/verify' && method === 'POST') {
+    const newTier = body.razorpayOrderId?.includes('starter') ? 'STARTER' : body.razorpayOrderId?.includes('premium') ? 'PREMIUM' : 'PRO';
+    const studentUser = currentUser || db.users[1];
+    studentUser.plan = newTier as any;
+    studentUser.credits = 999;
+    db.save();
+
+    return {
+      success: true,
+      message: 'Payment verified successfully! Entitlements granted.',
+      payment: {
+        _id: `pay_${Date.now()}`,
+        razorpayOrderId: body.razorpayOrderId,
+        amount: 399,
+        currency: 'INR',
+        status: 'success',
+        createdAt: new Date().toISOString(),
+      },
+      entitlements: {
+        plan: newTier,
+        credits: 999,
+        features: ['text_interviews', 'voice_interviews', 'video_interviews', 'personalized_roadmaps'],
+      },
+    } as unknown as T;
+  }
+
+  if (path === '/api/payments/history' && method === 'GET') {
+    return {
+      success: true,
+      payments: [
+        {
+          _id: 'pay_hist_01',
+          razorpayOrderId: 'order_test_987654',
+          amount: 399,
+          currency: 'INR',
+          status: 'success',
+          itemType: 'plan_subscription',
+          itemTitle: 'Pro Career Monthly',
+          createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+        },
+      ],
+    } as unknown as T;
+  }
+
   throw new ApiError(404, `Endpoint ${method} ${path} not found.`);
 }
