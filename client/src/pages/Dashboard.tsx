@@ -6,7 +6,7 @@ import { enrollmentService } from '../services/enrollmentService';
 import { interviewService } from '../services/interviewService';
 import { resumeService } from '../services/resumeService';
 import { studentService } from '../services/studentService';
-import { Enrollment, Recommendation, StudentProject, Interview, ResumeAnalysis } from '../types';
+import { Enrollment, Recommendation, StudentProject, Interview, ResumeAnalysis, Assessment } from '../types';
 import { PortfolioManager } from '../components/dashboard/PortfolioManager';
 import { CompactCareerOrb } from '../components/3d/CompactCareerOrb';
 import { 
@@ -30,6 +30,7 @@ export const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<StudentProject[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [recentResume, setRecentResume] = useState<ResumeAnalysis | null>(null);
+  const [recentAssessment, setRecentAssessment] = useState<Assessment | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,11 +40,12 @@ export const Dashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [dashRes, enrollRes, intRes, resRes] = await Promise.all([
+      const [dashRes, enrollRes, intRes, resRes, assRes] = await Promise.all([
         learningService.getDashboard().catch(() => ({ stats: { enrolledCount: 3, inProgressCount: 2, completedCount: 1, learningHoursEstimate: 24, projectsCount: 2 }, recommendations: [], projects: [] })),
         enrollmentService.getMyEnrollments().catch(() => ({ enrollments: [] })),
         interviewService.getHistory().catch(() => ({ interviews: [] })),
         resumeService.getHistory().catch(() => ({ analyses: [] })),
+        studentService.getAssessments().catch(() => ({ assessments: [] })),
       ]);
 
       setStats(dashRes.stats);
@@ -53,6 +55,9 @@ export const Dashboard: React.FC = () => {
       setInterviews(intRes.interviews || []);
       if (resRes.analyses && resRes.analyses.length > 0) {
         setRecentResume(resRes.analyses[0]);
+      }
+      if (assRes.assessments && assRes.assessments.length > 0) {
+        setRecentAssessment(assRes.assessments[0]);
       }
     } catch (err) {
       console.warn('Could not load dashboard data:', err);
@@ -320,6 +325,46 @@ export const Dashboard: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Skill Assessment Benchmark Widget */}
+            <div className="glass-panel rounded-3xl p-6 border border-white/10">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+                <h3 className="text-sm font-heading font-bold text-white flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-[#F4B860]" />
+                  <span>AI Skill Assessment</span>
+                </h3>
+                <Link to="/student/assessments" className="text-xs text-[#8065FF] hover:underline font-semibold">
+                  Test Skills
+                </Link>
+              </div>
+
+              {recentAssessment ? (
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-[#A6B0C8]">Latest Skill:</span>
+                    <span className="font-semibold text-white">{recentAssessment.skill || recentAssessment.title}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#A6B0C8]">Proficiency Level:</span>
+                    <span className="font-bold text-[#8065FF] uppercase text-[11px]">{recentAssessment.proficiency || 'Intermediate'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#A6B0C8]">Score Benchmark:</span>
+                    <span className="font-bold text-emerald-400">{recentAssessment.percentage}% ({recentAssessment.score}/{recentAssessment.maxScore} pts)</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs text-[#A6B0C8] space-y-2">
+                  <p>Take an adaptive technical drill to verify your skill proficiency and uncover knowledge gaps.</p>
+                  <Link
+                    to="/student/assessments"
+                    className="inline-block px-3 py-1.5 rounded-lg bg-[#8065FF]/20 text-[#A68BFF] font-semibold text-xs border border-[#8065FF]/30"
+                  >
+                    Start Assessment
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Resume Quick Widget */}

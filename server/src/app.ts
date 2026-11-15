@@ -18,6 +18,7 @@ import adminRoutes from './routes/adminRoutes.js';
 
 // LEARNOVA Career Intelligence Routers
 import studentRoutes from './routes/studentRoutes.js';
+import assessmentRoutes from './routes/assessmentRoutes.js';
 import interviewRoutes from './routes/interviewRoutes.js';
 import resumeRoutes from './routes/resumeRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
@@ -93,8 +94,10 @@ export const createApp = (): Express => {
 
   // LEARNOVA Career Intelligence Endpoints
   app.use('/api/student', studentRoutes);
+  app.use('/api/assessments', assessmentRoutes);
   app.use('/api/ai/interviews', interviewRoutes);
   app.use('/api/ai/resumes', resumeRoutes);
+  app.use('/api/resumes', resumeRoutes);
   app.use('/api/payments', paymentRoutes);
   app.use('/api/learning-plus', learningPlusRoutes);
   app.use('/api/career-hub', careerHubRoutes);

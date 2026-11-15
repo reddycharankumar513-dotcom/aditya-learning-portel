@@ -102,26 +102,57 @@ export interface SkillGap {
   recommendation: string;
 }
 
+export interface TopicBreakdown {
+  topic: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+}
+
+export interface LearningRecommendation {
+  topic: string;
+  reason: string;
+  suggestedResource: string;
+  priority: 'High' | 'Medium' | 'Low';
+}
+
 export interface AssessmentQuestion {
   id: number;
   question: string;
-  options: string[];
-  correctAnswer: number;
-  selectedAnswer?: number;
+  skillCategory?: string;
+  topic?: string;
+  difficulty?: string;
+  type?: string;
+  options?: string[];
+  correctAnswer?: any;
+  selectedAnswer?: any;
   isCorrect?: boolean;
-  explanation: string;
+  marksAwarded?: number;
+  explanation?: string;
+  evaluationCriteria?: string;
+  feedback?: string;
+  maxMarks?: number;
 }
 
 export interface Assessment {
   _id: string;
   user: string;
   title: string;
-  domain: string;
+  role?: string;
+  skill?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+  durationMinutes?: number;
+  status?: 'created' | 'in_progress' | 'completed' | 'abandoned';
+  domain?: string;
   questions: AssessmentQuestion[];
   score: number;
   maxScore: number;
   percentage: number;
+  proficiency?: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+  topicBreakdown?: TopicBreakdown[];
   skillGaps: SkillGap[];
+  learningRecommendations?: LearningRecommendation[];
+  startedAt?: string;
   completedAt: string;
   createdAt: string;
 }
@@ -130,23 +161,74 @@ export interface BulletSuggestion {
   original: string;
   improved: string;
   reason: string;
+  status?: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface SectionScores {
+  skillsRelevance: number;
+  projectsExperience: number;
+  experienceInternships: number;
+  educationCertifications: number;
+  resumeStructure: number;
+  jobAlignment: number;
+  writingQuality: number;
 }
 
 export interface ResumeAnalysis {
   _id: string;
   user?: string;
+  resume?: string;
   fileName: string;
   targetRole: string;
   targetJobDescription?: string;
+  overallScore?: number;
   atsScore: number;
+  sectionScores?: SectionScores;
   matchPercentage: number;
   extractedSkills: string[];
   missingKeywords: string[];
   strengths: string[];
   improvements: string[];
+  weaknesses?: string[];
   bulletPointSuggestions: BulletSuggestion[];
+  tailoringRecommendations?: string[];
   experienceSummary?: string;
   educationSummary?: string;
+  createdAt: string;
+}
+
+export interface Resume {
+  _id: string;
+  user: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  targetRole: string;
+  targetJobDescription?: string;
+  rawText: string;
+  parsedSections: {
+    personalInfo?: {
+      name?: string;
+      email?: string;
+      phone?: string;
+      linkedin?: string;
+      github?: string;
+      portfolio?: string;
+      location?: string;
+    };
+    summary?: string;
+    skills?: string[];
+    experience?: Array<{ title: string; company: string; duration?: string; bullets: string[] }>;
+    projects?: Array<{ title: string; techStack?: string[]; description?: string; bullets: string[] }>;
+    education?: Array<{ degree: string; institution: string; year?: string; grade?: string }>;
+    certifications?: string[];
+  };
+  improvedContent?: {
+    summary?: string;
+    projects?: Array<{ title: string; bullets: string[] }>;
+    acceptedSuggestions?: string[];
+  };
+  latestAnalysis?: ResumeAnalysis;
   createdAt: string;
 }
 

@@ -10,11 +10,43 @@ export const studentService = {
     return api.put<{ success: boolean; profile: User; message: string }>('/api/student/profile', data);
   },
 
-  getAssessments: async (): Promise<{ success: boolean; assessments: Assessment[] }> => {
-    return api.get<{ success: boolean; assessments: Assessment[] }>('/api/student/assessments');
+  generateAssessment: async (params: {
+    role: string;
+    skill: string;
+    difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+    questionCount?: number;
+    durationMinutes?: number;
+  }): Promise<{ success: boolean; message: string; assessment: Assessment }> => {
+    return api.post<{ success: boolean; message: string; assessment: Assessment }>(
+      '/api/assessments/generate',
+      params
+    );
   },
 
-  submitAssessment: async (data: {
+  getAssessments: async (): Promise<{ success: boolean; assessments: Assessment[] }> => {
+    return api.get<{ success: boolean; assessments: Assessment[] }>('/api/assessments');
+  },
+
+  getAssessmentById: async (id: string): Promise<{ success: boolean; assessment: Assessment }> => {
+    return api.get<{ success: boolean; assessment: Assessment }>(`/api/assessments/${id}`);
+  },
+
+  startAssessment: async (id: string): Promise<{ success: boolean; assessment: Assessment }> => {
+    return api.post<{ success: boolean; assessment: Assessment }>(`/api/assessments/${id}/start`, {});
+  },
+
+  submitAssessment: async (
+    id: string,
+    answers: Record<number, any>
+  ): Promise<{ success: boolean; message: string; assessment: Assessment }> => {
+    return api.post<{ success: boolean; message: string; assessment: Assessment }>(
+      `/api/assessments/${id}/submit`,
+      { answers }
+    );
+  },
+
+  // Legacy fallback support
+  submitLegacyAssessment: async (data: {
     title?: string;
     domain?: string;
     answers: Record<number, number>;
