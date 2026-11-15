@@ -24,6 +24,7 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import learningPlusRoutes from './routes/learningPlusRoutes.js';
 import careerHubRoutes from './routes/careerHubRoutes.js';
 import employerRoutes from './routes/employerRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 export const createApp = (): Express => {
   const app = express();
@@ -34,12 +35,24 @@ export const createApp = (): Express => {
   // CORS Configuration
   app.use(
     cors({
-      origin: [
-        ENV.CLIENT_URL,
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://127.0.0.1:5173',
-      ],
+      origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        const allowed = Array.from(new Set([...ENV.ALLOWED_ORIGINS, ENV.CLIENT_URL]));
+        const isFreeDomain = 
+          origin.endsWith('.vercel.app') ||
+          origin.endsWith('.onrender.com') ||
+          origin.endsWith('.duckdns.org') ||
+          origin.endsWith('.up.railway.app') ||
+          origin.endsWith('.pages.dev') ||
+          origin.endsWith('.github.io') ||
+          origin.endsWith('.learnova.in');
+
+        if (allowed.includes(origin) || isFreeDomain) {
+          return callback(null, true);
+        }
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
@@ -86,6 +99,7 @@ export const createApp = (): Express => {
   app.use('/api/learning-plus', learningPlusRoutes);
   app.use('/api/career-hub', careerHubRoutes);
   app.use('/api/employers', employerRoutes);
+  app.use('/api/upload', uploadRoutes);
 
   // Centralized Error Handler
   app.use(errorHandler);

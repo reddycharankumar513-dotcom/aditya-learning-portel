@@ -1,0 +1,15 @@
+# =================================================================
+# Example Terraform Variables for LEARNOVA Production
+# =================================================================
+
+aws_region          = "ap-south-1" # AWS Mumbai
+environment         = "production"
+project_name        = "learnova"
+domain_name         = "learnova.in"
+acm_certificate_arn = "arn:aws:acm:ap-south-1:123456789012:certificate/abcdef-1234-5678-90ab-cdef12345678"
+github_repository   = "reddycharankumar513-dotcom/aditya-learning-portel"
+
+container_port     = 5000
+container_cpu      = 512  # 0.5 vCPU
+container_memory   = 1024 # 1.0 GB RAM
+desired_task_count = 2

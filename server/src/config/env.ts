@@ -15,6 +15,20 @@ export const ENV = {
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || 'rzp_test_LearnovaDemo2026',
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || 'learnova_rzp_secret_key_mock_987654',
   RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || 'learnova_webhook_secret_key_123456',
+  AWS_REGION: process.env.AWS_REGION || 'ap-south-1',
+  S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || 'learnova-storage-prod',
+  ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim())
+    : [
+        'https://learnova.in',
+        'https://www.learnova.in',
+        'https://app.learnova.in',
+        'https://admin.learnova.in',
+        'https://aditya-learning-portel.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:5173',
+      ],
 };
 
 export const updateEnvKey = (key: keyof typeof ENV, value: any): void => {
