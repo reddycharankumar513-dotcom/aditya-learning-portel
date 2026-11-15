@@ -38,6 +38,12 @@ export interface IUser extends Document {
   readinessBreakdown: IReadinessBreakdown;
   credits: number;
   plan: 'FREE' | 'STARTER' | 'PRO' | 'PREMIUM';
+  adminRole?: 'super_admin' | 'finance_admin' | 'content_admin' | 'support_admin';
+  permissions?: string[];
+  isSuspended?: boolean;
+  suspensionReason?: string;
+  lastLoginAt?: Date;
+  consentShareProfile?: boolean;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   createdAt: Date;
@@ -164,6 +170,30 @@ const UserSchema = new Schema<IUser>(
       type: String,
       enum: ['FREE', 'STARTER', 'PRO', 'PREMIUM'],
       default: 'FREE',
+    },
+    adminRole: {
+      type: String,
+      enum: ['super_admin', 'finance_admin', 'content_admin', 'support_admin'],
+      default: 'super_admin',
+    },
+    permissions: {
+      type: [String],
+      default: [],
+    },
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
+    suspensionReason: {
+      type: String,
+      default: '',
+    },
+    lastLoginAt: {
+      type: Date,
+    },
+    consentShareProfile: {
+      type: Boolean,
+      default: true,
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

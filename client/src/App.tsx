@@ -56,6 +56,14 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminCourses } from './pages/AdminCourses';
 import { AdminInternships } from './pages/AdminInternships';
 import { AdminUsers } from './pages/AdminUsers';
+import { AdminEmployers } from './pages/AdminEmployers';
+import { AdminPlans } from './pages/AdminPlans';
+import { AdminPayments } from './pages/AdminPayments';
+import { AdminAIConfig } from './pages/AdminAIConfig';
+import { AdminContent } from './pages/AdminContent';
+import { AdminNotifications } from './pages/AdminNotifications';
+import { AdminSupport } from './pages/AdminSupport';
+import { AdminAuditLogs } from './pages/AdminAuditLogs';
 import { AdminSettings } from './pages/AdminSettings';
 
 // Scroll to top helper on navigation
@@ -415,18 +423,10 @@ export function App() {
               }
             />
             <Route
-              path="/admin/courses"
+              path="/admin/analytics"
               element={
                 <ProtectedRoute requireAdmin>
-                  <AdminCourses />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/internships"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminInternships />
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />
@@ -439,42 +439,10 @@ export function App() {
               }
             />
             <Route
-              path="/admin/settings"
+              path="/admin/students"
               element={
                 <ProtectedRoute requireAdmin>
-                  <AdminSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/plans"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/payments"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/subscriptions"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/refunds"
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminSettings />
+                  <AdminUsers />
                 </ProtectedRoute>
               }
             />
@@ -482,7 +450,79 @@ export function App() {
               path="/admin/employers"
               element={
                 <ProtectedRoute requireAdmin>
-                  <AdminUsers />
+                  <AdminEmployers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/plans"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPlans />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/credits"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPlans />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/payments"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPayments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/refunds"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPayments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/subscriptions"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminPayments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/ai"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminAIConfig />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/ai/config"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminAIConfig />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/courses"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminCourses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/opportunities"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminInternships />
                 </ProtectedRoute>
               }
             />
@@ -495,10 +535,90 @@ export function App() {
               }
             />
             <Route
-              path="/admin/analytics"
+              path="/admin/internships"
               element={
                 <ProtectedRoute requireAdmin>
-                  <AdminDashboard />
+                  <AdminInternships />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/content"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminContent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cms"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminContent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/notifications"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminNotifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/broadcast"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminNotifications />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/support"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSupport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/tickets"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSupport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/audit-logs"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminAuditLogs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/audit"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminAuditLogs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/roles"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminSettings />
                 </ProtectedRoute>
               }
             />

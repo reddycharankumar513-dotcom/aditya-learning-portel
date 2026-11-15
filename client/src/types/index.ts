@@ -18,6 +18,12 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  adminRole?: 'super_admin' | 'finance_admin' | 'content_admin' | 'support_admin';
+  permissions?: string[];
+  isSuspended?: boolean;
+  suspensionReason?: string;
+  lastLoginAt?: string;
+  consentShareProfile?: boolean;
   phone?: string;
   college?: string;
   degree?: string;
@@ -171,6 +177,7 @@ export interface CourseModule {
 
 export interface Course {
   _id: string;
+  id?: string;
   slug: string;
   title: string;
   shortDescription: string;
@@ -178,13 +185,14 @@ export interface Course {
   category: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   duration: string;
-  iconName: string;
+  iconName?: string;
   modules: CourseModule[];
   learningObjectives: string[];
   prerequisites: string[];
   isPublished: boolean;
   instructorName?: string;
   instructorRole?: string;
+  enrolledStudents?: number;
   enrolledCount?: number;
   featured?: boolean;
 }
