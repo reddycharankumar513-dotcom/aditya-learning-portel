@@ -38,8 +38,18 @@ export const paymentService = {
     plans: PlanItem[];
     creditPacks: CreditPackItem[];
     keyId: string;
+    isLive?: boolean;
   }> => {
     return api.get('/api/payments/plans');
+  },
+
+  getConfig: async (): Promise<{
+    success: boolean;
+    currency: string;
+    keyId: string;
+    isLive: boolean;
+  }> => {
+    return api.get('/api/payments/config');
   },
 
   createOrder: async (

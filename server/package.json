@@ -9,7 +9,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed": "tsx src/seeds/seedData.ts",
-    "test": "tsx src/tests/learnova.test.ts && tsx src/tests/admin.test.ts && tsx src/tests/aiIntegration.test.ts"
+    "test": "tsx src/tests/learnova.test.ts && tsx src/tests/admin.test.ts && tsx src/tests/aiIntegration.test.ts && tsx src/tests/razorpayLive.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1169.0",

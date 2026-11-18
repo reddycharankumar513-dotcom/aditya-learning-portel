@@ -908,6 +908,15 @@ export function handleMockApiRequest<T>(endpoint: string, options: RequestInit =
   // -------------------------------------------------------------
   // RAZORPAY PAYMENT SIMULATION HANDLERS
   // -------------------------------------------------------------
+  if (path === '/api/payments/config' && method === 'GET') {
+    return {
+      success: true,
+      currency: 'INR',
+      keyId: 'rzp_live_U1gvxxE66eARkT',
+      isLive: true,
+    } as unknown as T;
+  }
+
   if (path === '/api/payments/plans' && method === 'GET') {
     return {
       success: true,
@@ -921,7 +930,8 @@ export function handleMockApiRequest<T>(endpoint: string, options: RequestInit =
         { id: 'pack_10_credits', name: '10 Interview Credits Pack', price: 149, credits: 10 },
         { id: 'pack_25_credits', name: '25 Interview Credits Pack', price: 299, credits: 25 },
       ],
-      keyId: 'rzp_test_LearnovaDemo2026',
+      keyId: 'rzp_live_U1gvxxE66eARkT',
+      isLive: true,
     } as unknown as T;
   }
 
@@ -933,7 +943,7 @@ export function handleMockApiRequest<T>(endpoint: string, options: RequestInit =
         id: orderId,
         amount: (body.itemId?.includes('starter') ? 199 : body.itemId?.includes('premium') ? 699 : 399) * 100,
         currency: 'INR',
-        keyId: 'rzp_test_LearnovaDemo2026',
+        keyId: 'rzp_live_U1gvxxE66eARkT',
         itemTitle: body.itemId,
         priceRupees: body.itemId?.includes('starter') ? 199 : body.itemId?.includes('premium') ? 699 : 399,
       },

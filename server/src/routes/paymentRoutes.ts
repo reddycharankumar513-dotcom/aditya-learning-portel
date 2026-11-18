@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import {
   getPricingCatalog,
+  getRazorpayConfig,
   createOrder,
   verifyPayment,
   handleWebhook,
@@ -12,6 +13,7 @@ const router = Router();
 
 // Public routes
 router.get('/plans', getPricingCatalog);
+router.get('/config', getRazorpayConfig);
 router.post('/webhook', handleWebhook);
 
 // Protected routes

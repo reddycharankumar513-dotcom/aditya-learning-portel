@@ -8,10 +8,11 @@ import { auditLogService } from '../services/auditLogService.js';
 import { ENV } from '../config/env.js';
 import Razorpay from 'razorpay';
 
-const razorpay = new Razorpay({
-  key_id: ENV.RAZORPAY_KEY_ID,
-  key_secret: ENV.RAZORPAY_KEY_SECRET,
-});
+const getRazorpayClient = () =>
+  new Razorpay({
+    key_id: ENV.RAZORPAY_KEY_ID,
+    key_secret: ENV.RAZORPAY_KEY_SECRET,
+  });
 
 export const adminPaymentController = {
   /**
@@ -129,7 +130,8 @@ export const adminPaymentController = {
       // If live or valid Razorpay payment ID exists, execute refund API
       if (payment.razorpayPaymentId && !payment.razorpayPaymentId.startsWith('pay_mock_') && ENV.RAZORPAY_KEY_SECRET !== 'learnova_rzp_secret_key_mock_987654') {
         try {
-          const rzpResponse = await razorpay.payments.refund(payment.razorpayPaymentId, {
+          const client = getRazorpayClient();
+          const rzpResponse = await client.payments.refund(payment.razorpayPaymentId, {
             amount: refundAmountINR * 100, // in paise
             notes: { reason, initiatedBy: req.user?.email || 'admin' },
           });
