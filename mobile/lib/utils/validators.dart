@@ -54,7 +54,7 @@ class Validators {
 
     // Only allow letters, spaces, dots, hyphens
     final nameRegex = RegExp(r"^[a-zA-Z\s\.\-']+$");
-    if (!nameRegex.test(trimmed)) {
+    if (!nameRegex.hasMatch(trimmed)) {
       return 'Customer name should only contain letters and spaces';
     }
 
@@ -82,7 +82,7 @@ class Validators {
     }
 
     final phoneRegex = RegExp(r'^[6-9]\d{9}$');
-    if (!phoneRegex.test(normalized)) {
+    if (!phoneRegex.hasMatch(normalized)) {
       return 'Please enter a valid Indian mobile number (starts with 6-9)';
     }
 
