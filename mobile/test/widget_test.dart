@@ -1,18 +1,42 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:learnova_pay/app.dart';
+import 'package:learnova_pay/widgets/payment_button.dart';
 
 void main() {
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-    GoogleFonts.config.allowRuntimeFetching = false;
+  testWidgets('PaymentButton renders title and handles tap correctly', (WidgetTester tester) async {
+    bool tapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PaymentButton(
+            title: 'Pay ₹1,499',
+            onPressed: () {
+              tapped = true;
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Pay ₹1,499'), findsOneWidget);
+    await tester.tap(find.text('Pay ₹1,499'));
+    expect(tapped, true);
   });
 
-  testWidgets('LearnovaPayApp smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const LearnovaPayApp());
-    await tester.pumpAndSettle();
+  testWidgets('PaymentButton shows loading indicator when isLoading is true', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PaymentButton(
+            title: 'Pay ₹1,499',
+            isLoading: true,
+            onPressed: () {},
+          ),
+        ),
+      ),
+    );
 
-    expect(find.byType(LearnovaPayApp), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }
