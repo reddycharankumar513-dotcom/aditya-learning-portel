@@ -73,16 +73,18 @@ jobs:
           flutter build apk --debug -v > build_debug.log 2>&1
           CODE=$?
           echo "Build finished with exit code: $CODE"
-          echo "=== LAST 80 LINES OF BUILD LOG ==="
           tail -n 80 build_debug.log
           exit $CODE
 
-      - name: Upload Debug Build Log
+      - name: Push Build Log to build-logs Branch
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-debug-log
-          path: mobile/build_debug.log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B build-logs
+          git add mobile/build_debug.log || true
+          git commit -m "chore: save build debug log" || true
+          git push -f origin build-logs || true
 
       - name: Build Android Release APK
         working-directory: mobile
