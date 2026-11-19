@@ -8,6 +8,8 @@ yarn-error.log*
 dist/
 build/
 .tsbuildinfo
+*.apk
+*.aab
 
 # Environment Variables & Secrets
 .env
