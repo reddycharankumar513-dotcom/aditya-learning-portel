@@ -73,7 +73,7 @@ class AuthService {
         if (_isAuthorizedStaff(cleanId, password)) {
           final staffUser = _createFallbackStaffUser(cleanId);
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(AppConstants.keyAuthToken, staffUser.token);
+          await prefs.setString(AppConstants.keyAuthToken, staffUser.token ?? '');
           await prefs.setString(AppConstants.keyStaffUser, jsonEncode(staffUser.toJson()));
           return staffUser;
         } else {
@@ -85,7 +85,7 @@ class AuthService {
       if (_isAuthorizedStaff(cleanId, password)) {
         final staffUser = _createFallbackStaffUser(cleanId);
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(AppConstants.keyAuthToken, staffUser.token);
+        await prefs.setString(AppConstants.keyAuthToken, staffUser.token ?? '');
         await prefs.setString(AppConstants.keyStaffUser, jsonEncode(staffUser.toJson()));
         return staffUser;
       }

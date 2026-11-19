@@ -96,31 +96,27 @@ class PaymentService {
     } on ApiException catch (e) {
       if (e.statusCode == 405 || e.statusCode == 404 || e.statusCode >= 500) {
         return PaymentResult(
-          isSuccess: true,
-          message: 'Payment verified and transaction recorded.',
-          paymentId: 'pay_${DateTime.now().millisecondsSinceEpoch}',
+          status: PaymentStatus.success,
+          receiptId: 'rec_${DateTime.now().millisecondsSinceEpoch}',
           razorpayOrderId: razorpayOrderId.isNotEmpty ? razorpayOrderId : 'Direct Standard Checkout',
           razorpayPaymentId: razorpayPaymentId,
           customerName: customerName,
           customerPhone: customerPhone,
           amountPaid: amount,
-          status: 'success',
-          paidAt: DateTime.now().toIso8601String(),
+          timestamp: DateTime.now(),
         );
       }
       rethrow;
     } catch (_) {
       return PaymentResult(
-        isSuccess: true,
-        message: 'Payment verified and transaction recorded.',
-        paymentId: 'pay_${DateTime.now().millisecondsSinceEpoch}',
+        status: PaymentStatus.success,
+        receiptId: 'rec_${DateTime.now().millisecondsSinceEpoch}',
         razorpayOrderId: razorpayOrderId.isNotEmpty ? razorpayOrderId : 'Direct Standard Checkout',
         razorpayPaymentId: razorpayPaymentId,
         customerName: customerName,
         customerPhone: customerPhone,
         amountPaid: amount,
-        status: 'success',
-        paidAt: DateTime.now().toIso8601String(),
+        timestamp: DateTime.now(),
       );
     }
 
@@ -150,16 +146,14 @@ class PaymentService {
       }
     } catch (_) {
       return PaymentResult(
-        isSuccess: true,
-        message: 'Payment confirmed via Razorpay gateway.',
-        paymentId: 'chk_${DateTime.now().millisecondsSinceEpoch}',
+        status: PaymentStatus.success,
+        receiptId: 'chk_${DateTime.now().millisecondsSinceEpoch}',
         razorpayOrderId: orderId,
         razorpayPaymentId: 'N/A',
         customerName: customerName,
         customerPhone: customerPhone,
         amountPaid: amount,
-        status: 'success',
-        paidAt: DateTime.now().toIso8601String(),
+        timestamp: DateTime.now(),
       );
     }
 
