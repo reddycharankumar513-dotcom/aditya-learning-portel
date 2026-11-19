@@ -50,7 +50,7 @@ jobs:
           flutter create --platforms=android --org com.learnova --project-name learnova_pay .
           chmod +x android/gradlew
           
-          echo "=== Updating AndroidManifest.xml safely with Python ==="
+          echo "=== Updating AndroidManifest.xml permissions ==="
           python3 -c "
           manifest_path = 'android/app/src/main/AndroidManifest.xml'
           with open(manifest_path, 'r', encoding='utf-8') as f:
@@ -66,11 +66,38 @@ jobs:
           print('AndroidManifest.xml successfully updated.')
           "
           
-          echo "=== Validating AndroidManifest.xml XML Syntax ==="
+          echo "=== Configuring minSdk 21 and Core Library Desugaring ==="
           python3 -c "
-          import xml.etree.ElementTree as ET
-          ET.parse('android/app/src/main/AndroidManifest.xml')
-          print('XML syntax is 100% valid.')
+          import os
+          kts = 'android/app/build.gradle.kts'
+          groovy = 'android/app/build.gradle'
+          if os.path.exists(kts):
+              with open(kts, 'r', encoding='utf-8') as f:
+                  c = f.read()
+              c = c.replace('minSdk = flutter.minSdkVersion', 'minSdk = 21')
+              if 'isCoreLibraryDesugaringEnabled' not in c:
+                  c = c.replace('compileOptions {', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true')
+              if 'dependencies {' in c:
+                  c = c.replace('dependencies {', 'dependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")')
+              else:
+                  c += '\ndependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")\n}\n'
+              with open(kts, 'w', encoding='utf-8') as f:
+                  f.write(c)
+              print('Patched build.gradle.kts with minSdk 21 and desugaring.')
+          elif os.path.exists(groovy):
+              with open(groovy, 'r', encoding='utf-8') as f:
+                  c = f.read()
+              c = c.replace('minSdkVersion flutter.minSdkVersion', 'minSdkVersion 21')
+              c = c.replace('minSdkVersion 16', 'minSdkVersion 21')
+              if 'coreLibraryDesugaringEnabled' not in c:
+                  c = c.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
+              if 'dependencies {' in c:
+                  c = c.replace('dependencies {', 'dependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"')
+              else:
+                  c += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n'
+              with open(groovy, 'w', encoding='utf-8') as f:
+                  f.write(c)
+              print('Patched build.gradle with minSdk 21 and desugaring.')
           "
 
       - name: Install Flutter Dependencies
@@ -93,27 +120,26 @@ jobs:
           CODE=$?
           echo "Debug build exited with code: $CODE"
           if [ $CODE -ne 0 ]; then
-            echo "=== EXTRACTED BUILD ERRORS ==="
             python3 -c "
             with open('build_debug.log', 'r', errors='ignore') as f:
                 lines = f.readlines()
-            errs = [l.strip() for l in lines if any(k in l.lower() for k in ['failure:', 'error:', 'exception:', 'could not resolve', 'aapt:'])]
-            print('\n'.join(errs[-40:] if len(errs) > 40 else errs))
+            with open('extracted_errors.txt', 'w', encoding='utf-8') as out:
+                out.write('### Last 60 lines of build log:\n\`\`\`\n' + ''.join(lines[-60:]) + '\n\`\`\`\n')
             "
-            echo "=== LAST 50 LINES OF LOG ==="
-            tail -n 50 build_debug.log
+            tail -n 60 build_debug.log
             exit $CODE
           fi
 
-      - name: Push Build Log to build-logs Branch on Failure
+      - name: Publish Failure Diagnostics Release
         if: failure()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B build-logs
-          git add mobile/build_debug.log || true
-          git commit -m "chore: save build debug log" || true
-          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git build-logs || true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: failure-diagnostics
+          name: "Build Failure Diagnostics"
+          body_path: mobile/extracted_errors.txt
+          files: mobile/build_debug.log
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Android Release APK
         working-directory: mobile
