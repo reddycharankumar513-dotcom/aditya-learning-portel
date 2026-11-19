@@ -43,16 +43,35 @@ jobs:
       - name: Generate Official Android Native Scaffolding
         working-directory: mobile
         run: |
-          echo "=== Removing legacy or corrupted android folder ==="
+          echo "=== Removing legacy android folder ==="
           rm -rf android
           
           echo "=== Generating official Flutter Android platform scaffolding ==="
           flutter create --platforms=android --org com.learnova --project-name learnova_pay .
           chmod +x android/gradlew
           
-          echo "=== Configuring AndroidManifest.xml permissions ==="
-          sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>' android/app/src/main/AndroidManifest.xml
-          sed -i 's/android:label="learnova_pay"/android:label="Learnova Pay"/g' android/app/src/main/AndroidManifest.xml
+          echo "=== Updating AndroidManifest.xml safely with Python ==="
+          python3 -c "
+          manifest_path = 'android/app/src/main/AndroidManifest.xml'
+          with open(manifest_path, 'r', encoding='utf-8') as f:
+              content = f.read()
+          
+          perms = '    <uses-permission android:name=\"android.permission.INTERNET\"/>\n    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>\n'
+          if 'android.permission.INTERNET' not in content:
+              content = content.replace('<application', perms + '    <application')
+          content = content.replace('android:label=\"learnova_pay\"', 'android:label=\"Learnova Pay\"')
+          
+          with open(manifest_path, 'w', encoding='utf-8') as f:
+              f.write(content)
+          print('AndroidManifest.xml successfully updated.')
+          "
+          
+          echo "=== Validating AndroidManifest.xml XML Syntax ==="
+          python3 -c "
+          import xml.etree.ElementTree as ET
+          ET.parse('android/app/src/main/AndroidManifest.xml')
+          print('XML syntax is 100% valid.')
+          "
 
       - name: Install Flutter Dependencies
         working-directory: mobile
@@ -72,19 +91,29 @@ jobs:
           set +e
           flutter build apk --debug -v > build_debug.log 2>&1
           CODE=$?
-          echo "Build finished with exit code: $CODE"
-          tail -n 80 build_debug.log
-          exit $CODE
+          echo "Debug build exited with code: $CODE"
+          if [ $CODE -ne 0 ]; then
+            echo "=== EXTRACTED BUILD ERRORS ==="
+            python3 -c "
+            with open('build_debug.log', 'r', errors='ignore') as f:
+                lines = f.readlines()
+            errs = [l.strip() for l in lines if any(k in l.lower() for k in ['failure:', 'error:', 'exception:', 'could not resolve', 'aapt:'])]
+            print('\n'.join(errs[-40:] if len(errs) > 40 else errs))
+            "
+            echo "=== LAST 50 LINES OF LOG ==="
+            tail -n 50 build_debug.log
+            exit $CODE
+          fi
 
-      - name: Push Build Log to build-logs Branch
-        if: always()
+      - name: Push Build Log to build-logs Branch on Failure
+        if: failure()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B build-logs
           git add mobile/build_debug.log || true
           git commit -m "chore: save build debug log" || true
-          git push -f origin build-logs || true
+          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git build-logs || true
 
       - name: Build Android Release APK
         working-directory: mobile
