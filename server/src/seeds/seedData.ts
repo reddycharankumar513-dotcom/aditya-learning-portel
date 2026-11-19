@@ -26,6 +26,21 @@ export const seedDatabase = async (): Promise<void> => {
     const bcrypt = await import('bcryptjs');
     const adminHashedPassword = await bcrypt.default.hash('Admin@123456', 10);
     const studentHashedPassword = await bcrypt.default.hash('Student@123456', 10);
+    const staffHashedPassword = await bcrypt.default.hash('Staff@123456', 10);
+
+    const staffUser = await User.findOneAndUpdate(
+      { email: 'staff@learnova.in' },
+      {
+        name: 'Learnova Staff Agent',
+        email: 'staff@learnova.in',
+        password: staffHashedPassword,
+        role: 'staff',
+        country: 'India',
+        educationStatus: 'Authorized Payment Collection Staff',
+        learningInterests: ['FinTech & Payments'],
+      },
+      { upsert: true, new: true }
+    );
 
     const adminUser = await User.findOneAndUpdate(
       { email: 'admin@aditya-ed.org' },

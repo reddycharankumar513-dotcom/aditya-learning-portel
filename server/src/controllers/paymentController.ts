@@ -85,33 +85,103 @@ export const getPricingCatalog = async (req: Request, res: Response): Promise<vo
 
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = (req as any).user?.userId;
-    const { itemType, itemId } = req.body;
+    const userObj = (req as any).user;
+    const userId = userObj?._id || userObj?.userId || userObj?.id;
 
     if (!userId) {
-      res.status(401).json({ message: 'Authentication required' });
+      res.status(401).json({ success: false, message: 'Authentication required' });
       return;
     }
 
-    // Find requested product
-    let product: any = null;
+    const {
+      itemType,
+      itemId,
+      amount,
+      customerName,
+      customerPhone,
+      paymentSource,
+      notes: customNotes,
+    } = req.body;
+
+    const isMobilePOS =
+      paymentSource === 'mobile' ||
+      itemType === 'mobile_collection' ||
+      Boolean(customerName);
+
+    let finalPrice = 0;
+    let finalTitle = '';
+    let finalItemType: any = itemType || 'plan_subscription';
+    let finalItemId = itemId || '';
     let creditsGranted = 0;
+    let cleanCustomerName: string | undefined;
+    let cleanCustomerPhone: string | undefined;
 
-    if (itemType === 'plan_subscription') {
-      product = Object.values(CATALOG_PRODUCTS.plans).find((p) => p.id === itemId);
-      if (product) creditsGranted = product.credits;
-    } else if (itemType === 'credit_pack') {
-      product = Object.values(CATALOG_PRODUCTS.creditPacks).find((p) => p.id === itemId);
-      if (product) creditsGranted = product.credits;
+    // Mobile POS Custom Payment Collection Flow
+    if (isMobilePOS) {
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid amount. Amount must be a positive number greater than 0.',
+        });
+        return;
+      }
+
+      if (parsedAmount > 500000) {
+        res.status(400).json({
+          success: false,
+          message: 'Amount exceeds maximum allowed transaction limit of ₹5,00,000.',
+        });
+        return;
+      }
+
+      cleanCustomerName = (customerName || '').toString().trim();
+      if (!cleanCustomerName || cleanCustomerName.length < 2) {
+        res.status(400).json({
+          success: false,
+          message: 'Please provide a valid customer name (at least 2 characters).',
+        });
+        return;
+      }
+
+      const rawPhone = (customerPhone || '').toString().trim().replace(/[^0-9]/g, '');
+      const normalizedPhone = rawPhone.length === 12 && rawPhone.startsWith('91') ? rawPhone.slice(2) : rawPhone;
+      if (!/^[6-9]\d{9}$/.test(normalizedPhone)) {
+        res.status(400).json({
+          success: false,
+          message: 'Please provide a valid 10-digit Indian mobile number.',
+        });
+        return;
+      }
+      cleanCustomerPhone = normalizedPhone;
+
+      finalPrice = Math.round(parsedAmount * 100) / 100;
+      finalTitle = `Payment Collection - ${cleanCustomerName}`;
+      finalItemType = 'mobile_collection';
+      finalItemId = 'staff_pos_collection';
+    } else {
+      // Standard Web Catalog Products
+      let product: any = null;
+      if (itemType === 'plan_subscription') {
+        product = Object.values(CATALOG_PRODUCTS.plans).find((p) => p.id === itemId);
+        if (product) creditsGranted = product.credits;
+      } else if (itemType === 'credit_pack') {
+        product = Object.values(CATALOG_PRODUCTS.creditPacks).find((p) => p.id === itemId);
+        if (product) creditsGranted = product.credits;
+      }
+
+      if (!product) {
+        res.status(400).json({ success: false, message: 'Invalid product or tier requested.' });
+        return;
+      }
+
+      finalPrice = product.price;
+      finalTitle = product.name;
     }
 
-    if (!product) {
-      res.status(400).json({ message: 'Invalid product or tier requested.' });
-      return;
-    }
-
-    const amountInPaise = product.price * 100;
-    const receiptId = `rcpt_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const amountInPaise = Math.round(finalPrice * 100);
+    const receiptPrefix = isMobilePOS ? 'rcpt_mob' : 'rcpt';
+    const receiptId = `${receiptPrefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
     let razorpayOrderId = `order_test_${Date.now()}`;
 
@@ -125,17 +195,26 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     if (isRealRazorpayKey) {
       try {
         const client = getRazorpayClient();
+        const orderNotes: Record<string, string> = {
+          userId: userId.toString(),
+          staffId: userId.toString(),
+          itemType: finalItemType,
+          itemId: finalItemId,
+          productName: finalTitle,
+        };
+
+        if (cleanCustomerName) orderNotes.customerName = cleanCustomerName;
+        if (cleanCustomerPhone) orderNotes.customerPhone = cleanCustomerPhone;
+        if (isMobilePOS) orderNotes.paymentSource = 'mobile';
+        if (customNotes) orderNotes.notes = customNotes.toString().slice(0, 100);
+
         const order = await client.orders.create({
           amount: amountInPaise,
           currency: 'INR',
           receipt: receiptId,
-          notes: {
-            userId: userId.toString(),
-            itemType,
-            itemId,
-            productName: product.name,
-          },
+          notes: orderNotes,
         });
+
         if (order && order.id) {
           razorpayOrderId = order.id;
         }
@@ -147,14 +226,19 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     // Persist pending payment in database
     const payment = await Payment.create({
       user: userId,
+      staffId: isMobilePOS ? userId : undefined,
+      customerName: cleanCustomerName,
+      customerPhone: cleanCustomerPhone,
+      paymentSource: isMobilePOS ? 'mobile' : 'web',
       razorpayOrderId,
-      amount: product.price,
+      amount: finalPrice,
+      amountInPaise,
       currency: 'INR',
       status: 'pending',
-      itemType,
-      itemId,
-      itemTitle: product.name,
-      priceSnapshot: product.price,
+      itemType: finalItemType,
+      itemId: finalItemId,
+      itemTitle: finalTitle,
+      priceSnapshot: finalPrice,
       creditsGranted,
       receiptId,
     });
@@ -167,35 +251,41 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         currency: 'INR',
         receipt: receiptId,
         keyId: ENV.RAZORPAY_KEY_ID,
-        itemTitle: product.name,
-        priceRupees: product.price,
+        itemTitle: finalTitle,
+        priceRupees: finalPrice,
+        customerName: cleanCustomerName,
+        customerPhone: cleanCustomerPhone,
       },
       paymentId: payment._id,
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error initiating Razorpay order', error: error.message });
+    res.status(500).json({ success: false, message: 'Error initiating Razorpay order', error: error.message });
   }
 };
 
 export const verifyPayment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = (req as any).user?.userId;
+    const userObj = (req as any).user;
+    const userId = (userObj?._id || userObj?.userId || userObj?.id)?.toString();
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
     if (!razorpayOrderId || !razorpayPaymentId) {
-      res.status(400).json({ message: 'Missing payment verification credentials.' });
+      res.status(400).json({ success: false, message: 'Missing payment verification credentials.' });
       return;
     }
 
     const payment = await Payment.findOne({ razorpayOrderId });
     if (!payment) {
-      res.status(404).json({ message: 'Payment order record not found.' });
+      res.status(404).json({ success: false, message: 'Payment order record not found.' });
       return;
     }
 
-    // Ownership check
-    if (payment.user.toString() !== userId.toString()) {
-      res.status(403).json({ message: 'Unauthorized payment verification attempt.' });
+    // Ownership check (allow matching user, staffId, or admin/staff role)
+    const isOwner = payment.user.toString() === userId || payment.staffId?.toString() === userId;
+    const isStaffOrAdmin = userObj?.role === 'staff' || userObj?.role === 'admin' || Boolean(userObj?.adminRole);
+
+    if (!isOwner && !isStaffOrAdmin) {
+      res.status(403).json({ success: false, message: 'Unauthorized payment verification attempt.' });
       return;
     }
 
@@ -203,15 +293,27 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
     if (payment.status === 'success') {
       res.json({
         success: true,
-        message: 'Payment already verified and entitlements active.',
-        payment,
+        message: 'Payment already verified and recorded.',
+        payment: {
+          id: payment._id,
+          razorpayOrderId: payment.razorpayOrderId,
+          razorpayPaymentId: payment.razorpayPaymentId,
+          customerName: payment.customerName,
+          customerPhone: payment.customerPhone,
+          amount: payment.amount,
+          amountInPaise: payment.amountInPaise,
+          currency: payment.currency,
+          status: payment.status,
+          paymentSource: payment.paymentSource,
+          paidAt: payment.updatedAt,
+        },
       });
       return;
     }
 
     // Cryptographic HMAC SHA-256 Signature Verification
     let isValid = false;
-    if (razorpaySignature) {
+    if (razorpaySignature && ENV.RAZORPAY_KEY_SECRET) {
       const expectedSignature = crypto
         .createHmac('sha256', ENV.RAZORPAY_KEY_SECRET)
         .update(`${razorpayOrderId}|${razorpayPaymentId}`)
@@ -228,22 +330,22 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
     if (!isValid) {
       payment.status = 'failed';
       await payment.save();
-      res.status(400).json({ message: 'Invalid Razorpay signature. Verification failed.' });
+      res.status(400).json({ success: false, message: 'Invalid Razorpay signature. Verification failed.' });
       return;
     }
 
-    // Authoritative payment confirmed: Update state and grant entitlements
+    // Authoritative payment confirmed: Update state
     payment.status = 'success';
     payment.razorpayPaymentId = razorpayPaymentId;
-    payment.razorpaySignature = razorpaySignature || 'verified_test_signature';
+    payment.razorpaySignature = razorpaySignature || 'verified_signature';
     await payment.save();
 
-    // Grant user plan or credits
+    // Grant user plan or credits for web subscriptions
     if (payment.itemType === 'plan_subscription') {
       const plan = Object.values(CATALOG_PRODUCTS.plans).find((p) => p.id === payment.itemId);
       if (plan) {
         await entitlementService.grantEntitlement(
-          userId,
+          payment.user,
           plan.tier,
           plan.credits,
           payment._id.toString()
@@ -251,23 +353,76 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
       }
     } else if (payment.itemType === 'credit_pack') {
       await entitlementService.grantEntitlement(
-        userId,
+        payment.user,
         undefined,
         payment.creditsGranted,
         payment._id.toString()
       );
     }
 
-    const entitlements = await entitlementService.getUserEntitlements(userId);
+    // Format response
+    res.json({
+      success: true,
+      message: 'Payment verified successfully and transaction recorded.',
+      payment: {
+        id: payment._id,
+        razorpayOrderId: payment.razorpayOrderId,
+        razorpayPaymentId: payment.razorpayPaymentId,
+        customerName: payment.customerName,
+        customerPhone: payment.customerPhone,
+        amount: payment.amount,
+        amountInPaise: payment.amountInPaise || payment.amount * 100,
+        currency: payment.currency,
+        status: payment.status,
+        paymentSource: payment.paymentSource,
+        staffId: payment.staffId,
+        createdAt: payment.createdAt,
+        paidAt: payment.updatedAt,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Error verifying payment', error: error.message });
+  }
+};
+
+export const getPaymentStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id || '');
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    const payment = await Payment.findOne({
+      $or: [
+        { razorpayOrderId: id },
+        { razorpayPaymentId: id },
+        { receiptId: id },
+        ...(isObjectId ? [{ _id: id }] : []),
+      ],
+    });
+
+    if (!payment) {
+      res.status(404).json({ success: false, message: 'Payment record not found.' });
+      return;
+    }
 
     res.json({
       success: true,
-      message: 'Payment verified successfully! Entitlements granted.',
-      payment,
-      entitlements,
+      payment: {
+        id: payment._id,
+        razorpayOrderId: payment.razorpayOrderId,
+        razorpayPaymentId: payment.razorpayPaymentId,
+        status: payment.status,
+        amount: payment.amount,
+        amountInPaise: payment.amountInPaise || payment.amount * 100,
+        currency: payment.currency,
+        customerName: payment.customerName,
+        customerPhone: payment.customerPhone,
+        paymentSource: payment.paymentSource,
+        staffId: payment.staffId,
+        createdAt: payment.createdAt,
+        updatedAt: payment.updatedAt,
+      },
     });
-  } catch (error: any) {
-    res.status(500).json({ message: 'Error verifying payment', error: error.message });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 

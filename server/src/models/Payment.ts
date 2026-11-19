@@ -2,13 +2,18 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IPayment extends Document {
   user: mongoose.Types.ObjectId;
+  staffId?: mongoose.Types.ObjectId;
+  customerName?: string;
+  customerPhone?: string;
+  paymentSource?: 'web' | 'mobile';
   razorpayOrderId: string;
   razorpayPaymentId?: string;
   razorpaySignature?: string;
   amount: number; // in INR rupees
+  amountInPaise?: number; // in paise (amount * 100)
   currency: string;
   status: 'pending' | 'success' | 'failed' | 'refunded';
-  itemType: 'plan_subscription' | 'credit_pack' | 'course';
+  itemType: 'plan_subscription' | 'credit_pack' | 'course' | 'mobile_collection' | 'custom_payment';
   itemId: string;
   itemTitle: string;
   priceSnapshot: number;
@@ -26,6 +31,25 @@ const PaymentSchema = new Schema<IPayment>(
       required: true,
       index: true,
     },
+    staffId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
+    customerName: {
+      type: String,
+      trim: true,
+    },
+    customerPhone: {
+      type: String,
+      trim: true,
+    },
+    paymentSource: {
+      type: String,
+      enum: ['web', 'mobile'],
+      default: 'web',
+      index: true,
+    },
     razorpayOrderId: {
       type: String,
       required: true,
@@ -41,6 +65,9 @@ const PaymentSchema = new Schema<IPayment>(
       type: Number,
       required: true,
     },
+    amountInPaise: {
+      type: Number,
+    },
     currency: {
       type: String,
       default: 'INR',
@@ -53,7 +80,7 @@ const PaymentSchema = new Schema<IPayment>(
     },
     itemType: {
       type: String,
-      enum: ['plan_subscription', 'credit_pack', 'course'],
+      enum: ['plan_subscription', 'credit_pack', 'course', 'mobile_collection', 'custom_payment'],
       required: true,
     },
     itemId: {

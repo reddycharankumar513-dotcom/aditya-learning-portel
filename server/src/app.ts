@@ -26,6 +26,8 @@ import learningPlusRoutes from './routes/learningPlusRoutes.js';
 import careerHubRoutes from './routes/careerHubRoutes.js';
 import employerRoutes from './routes/employerRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import staffRoutes from './routes/staffRoutes.js';
+import { handleWebhook } from './controllers/paymentController.js';
 
 export const createApp = (): Express => {
   const app = express();
@@ -99,6 +101,8 @@ export const createApp = (): Express => {
   app.use('/api/ai/resumes', resumeRoutes);
   app.use('/api/resumes', resumeRoutes);
   app.use('/api/payments', paymentRoutes);
+  app.use('/api/staff', staffRoutes);
+  app.post('/api/webhooks/razorpay', handleWebhook);
   app.use('/api/learning-plus', learningPlusRoutes);
   app.use('/api/career-hub', careerHubRoutes);
   app.use('/api/employers', employerRoutes);

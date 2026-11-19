@@ -7,6 +7,7 @@ import {
   verifyPayment,
   handleWebhook,
   getPaymentHistory,
+  getPaymentStatus,
 } from '../controllers/paymentController.js';
 
 const router = Router();
@@ -20,5 +21,6 @@ router.post('/webhook', handleWebhook);
 router.post('/create-order', requireAuth, createOrder);
 router.post('/verify', requireAuth, verifyPayment);
 router.get('/history', requireAuth, getPaymentHistory);
+router.get('/:id/status', requireAuth, getPaymentStatus);
 
 export default router;
