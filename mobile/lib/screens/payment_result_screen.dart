@@ -66,10 +66,11 @@ class _PaymentResultScreenState extends State<PaymentResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(context, true); // return true to reset form
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.pop(context, true);
       },
       child: Scaffold(
         backgroundColor: AppConstants.backgroundWhite,

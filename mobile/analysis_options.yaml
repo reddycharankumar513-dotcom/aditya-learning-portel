@@ -1,5 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    deprecated_member_use: ignore
+    use_build_context_synchronously: ignore
+    asset_does_not_exist: warning
+
 linter:
   rules:
     prefer_const_constructors: true

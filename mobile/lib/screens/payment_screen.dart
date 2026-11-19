@@ -126,11 +126,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void _openRazorpayCheckout(PaymentOrder order) {
     final keyId = order.keyId.isNotEmpty ? order.keyId : AppConstants.defaultRazorpayKeyId;
 
-    final options = {
+    final Map<String, dynamic> options = {
       'key': keyId,
       'amount': order.amountInPaise,
       'name': AppConstants.merchantName,
-      'description': 'Collection for ${_currentCustomerName}',
+      'description': 'Collection for $_currentCustomerName',
       'order_id': order.orderId,
       'prefill': {
         'name': _currentCustomerName,
