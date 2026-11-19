@@ -57,13 +57,39 @@ jobs:
           cat << 'EOF' > android/app/proguard-rules.pro
           -keepattributes *Annotation*
           -dontwarn com.razorpay.**
-          -keep class com.razorpay.** {*;}
-          -optimizations !class/merging/vertical*,!class/merging/horizontal*
-          -keepattributes JavascriptInterface
-          -keepclassmembers class * {
-              @android.webkit.JavascriptInterface <methods>;
+          -keep class com.razorpay.** { *; }
+          -optimizations !method/inlining/
+          -keepclasseswithmembers class * {
+              public void onPayment*(...);
+          }
+          -keep class proguard.annotation.** { *; }
+          EOF
+
+          echo "=== Applying AGP 8 Plugin Namespace Fallback to android/build.gradle ==="
+          cat << 'EOF' >> android/build.gradle
+
+          subprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      if (project.android.namespace == null) {
+                          project.android.namespace = project.group ?: "com.learnova.${project.name.replace('-', '_')}"
+                      }
+                  }
+              }
           }
           EOF
+
+          echo "=== Configuring Release Signing with Debug Keystore in app/build.gradle ==="
+          python3 -c "
+          p = 'android/app/build.gradle'
+          with open(p, 'r') as f:
+              c = f.read()
+          # Ensure release signing uses debug keystore so release apk is installable
+          if 'signingConfig = signingConfigs.debug' not in c:
+              c = c.replace('buildTypes {', 'buildTypes {\n        release {\n            signingConfig = signingConfigs.debug\n        }')
+          with open(p, 'w') as f:
+              f.write(c)
+          "
 
       - name: Install Flutter Dependencies
         working-directory: mobile
@@ -79,11 +105,37 @@ jobs:
 
       - name: Build Android Debug APK
         working-directory: mobile
-        run: flutter build apk --debug -v
+        run: |
+          set +e
+          flutter build apk --debug -v > build_debug.log 2>&1
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            echo "## ❌ Android Debug APK Build Failed (Exit Code $CODE)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 build_debug.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 60 build_debug.log
+            exit $CODE
+          else
+            echo "## ✅ Android Debug APK Build Succeeded" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Build Android Release APK
         working-directory: mobile
-        run: flutter build apk --release --no-tree-shake-icons
+        run: |
+          set +e
+          flutter build apk --release --no-tree-shake-icons -v > build_release.log 2>&1
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            echo "## ❌ Android Release APK Build Failed (Exit Code $CODE)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 build_release.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 60 build_release.log
+            exit $CODE
+          else
+            echo "## ✅ Android Release APK Build Succeeded" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Build Android Release AppBundle (AAB)
         working-directory: mobile
