@@ -57,5 +57,22 @@ void main() {
       expect(result.customerName, 'Aarav Patel');
       expect(result.amountPaid, 1499.0);
     });
+
+    test('PaymentOrder handles direct checkout mode without orderId', () {
+      final order = PaymentOrder(
+        orderId: '',
+        amountInPaise: 49900,
+        amountRupees: 499.0,
+        currency: 'INR',
+        keyId: 'rzp_live_U1gvxxE66eARkT',
+        customerName: 'Priya Sharma',
+        customerPhone: '9876543210',
+      );
+
+      expect(order.orderId, isEmpty);
+      expect(order.amountInPaise, 49900);
+      expect(order.amountRupees, 499.0);
+      expect(order.keyId, 'rzp_live_U1gvxxE66eARkT');
+    });
   });
 }

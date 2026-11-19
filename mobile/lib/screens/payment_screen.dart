@@ -131,7 +131,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       'amount': order.amountInPaise,
       'name': AppConstants.merchantName,
       'description': 'Collection for $_currentCustomerName',
-      'order_id': order.orderId,
       'prefill': {
         'name': _currentCustomerName,
         'contact': _currentCustomerPhone,
@@ -149,6 +148,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'confirm_close': true,
       },
     };
+
+    if (order.orderId.isNotEmpty) {
+      options['order_id'] = order.orderId;
+    }
 
     try {
       _razorpay.open(options);
