@@ -13,16 +13,7 @@ export const seedDatabase = async (): Promise<void> => {
       return;
     }
 
-    const courseCount = await Course.countDocuments();
-    if (courseCount > 0) {
-      console.log(`[Seed] Database already contains ${courseCount} courses. Seeding skipped.`);
-      return;
-    }
-
-    console.log('[Seed] Seeding initial ADITYA database content...');
-
-    // 1. Seed Demo Admin & Student Users
-    import('bcryptjs').then(async (bcrypt) => {});
+    // 1. Seed / Ensure Demo Admin & Staff Users are always present
     const bcrypt = await import('bcryptjs');
     const adminHashedPassword = await bcrypt.default.hash('Admin@123456', 10);
     const studentHashedPassword = await bcrypt.default.hash('Student@123456', 10);
@@ -70,6 +61,12 @@ export const seedDatabase = async (): Promise<void> => {
       },
       { upsert: true, new: true }
     );
+
+    const courseCount = await Course.countDocuments();
+    if (courseCount > 0) {
+      console.log(`[Seed] Database already contains ${courseCount} courses. Course seeding skipped.`);
+      return;
+    }
 
     // 2. Seed Rich Course Curriculums
     const initialCourses = [
