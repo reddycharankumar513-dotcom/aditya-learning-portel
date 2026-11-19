@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:learnova_pay/widgets/payment_button.dart';
 
 void main() {
-  testWidgets('PaymentButton renders title and handles tap correctly', (WidgetTester tester) async {
+  testWidgets('PaymentButton renders text and handles tap correctly', (WidgetTester tester) async {
     bool tapped = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: PaymentButton(
-            title: 'Pay ₹1,499',
+            text: 'Pay ₹1,499',
             onPressed: () {
               tapped = true;
             },
@@ -29,7 +29,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: PaymentButton(
-            title: 'Pay ₹1,499',
+            text: 'Pay ₹1,499',
             isLoading: true,
             onPressed: () {},
           ),
