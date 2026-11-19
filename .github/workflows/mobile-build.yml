@@ -27,14 +27,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
       - name: Set up Flutter SDK
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.x'
           channel: 'stable'
-          cache: true
 
       - name: Verify Flutter Installation
         working-directory: mobile
@@ -43,8 +41,9 @@ jobs:
       - name: Generate Official Android Native Scaffolding
         working-directory: mobile
         run: |
-          echo "=== Removing legacy android folder ==="
+          echo "=== Removing legacy android folder and gradle caches ==="
           rm -rf android
+          rm -rf ~/.gradle/caches
           
           echo "=== Generating official Flutter Android platform scaffolding ==="
           flutter create --platforms=android --org com.learnova --project-name learnova_pay .
@@ -100,9 +99,11 @@ jobs:
               print('Patched build.gradle with minSdk 21 and desugaring.')
           "
 
-      - name: Install Flutter Dependencies
+      - name: Clean & Install Flutter Dependencies
         working-directory: mobile
-        run: flutter pub get
+        run: |
+          flutter clean
+          flutter pub get
 
       - name: Analyze Flutter Code
         working-directory: mobile
